@@ -24,10 +24,8 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                bat '''
-                    timeout /t 10 /nobreak
-                    curl -f http://localhost:3000/health || exit 1
-                '''
+                bat 'ping 127.0.0.1 -n 11 > nul'
+                bat 'curl -f http://localhost:3000/health || exit 1'
             }
         }
     }
