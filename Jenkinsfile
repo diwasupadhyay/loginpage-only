@@ -16,41 +16,37 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci'
+                bat 'npm ci'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npm test'
+                bat 'npm test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                    docker.build("${DOCKER_IMAGE}:latest")
-                }
+                bat "docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% ."
+                bat "docker build -t %DOCKER_IMAGE%:latest ."
             }
         }
 
         stage('Deploy') {
             steps {
-                sh '''
-                    docker-compose down || true
-                    docker-compose up -d --build
-                '''
+                bat 'docker-compose down || exit 0'
+                bat 'docker-compose up -d --build'
             }
         }
 
         stage('Health Check') {
             steps {
-                sh '''
-                    echo "Waiting for app to start..."
-                    sleep 10
+                bat '''
+                    echo Waiting for app to start...
+                    timeout /t 10 /nobreak
                     curl -f http://localhost:3000/health || exit 1
-                    echo "App is healthy!"
+                    echo App is healthy!
                 '''
             }
         }
@@ -62,7 +58,7 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
-            sh 'docker-compose logs app || true'
+            bat 'docker-compose logs app || exit 0'
         }
         always {
             cleanWs()
