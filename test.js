@@ -1,9 +1,9 @@
-const assert = require('assert');
+const { describe, it } = require('node:test');
+const assert = require('node:assert');
 
 // Basic smoke tests
 describe('App', () => {
   it('should have required environment variables defined', () => {
-    // These should not throw
     require('dotenv').config();
     assert.ok(true);
   });
@@ -11,7 +11,7 @@ describe('App', () => {
   it('should load User model without errors', () => {
     const User = require('./models/User');
     assert.ok(User);
-    assert.ok(User.modelName === 'User');
+    assert.strictEqual(User.modelName, 'User');
   });
 
   it('should load routes without errors', () => {

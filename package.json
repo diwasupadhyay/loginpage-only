@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "node --watch app.js",
-    "test": "node --test test.js || node -e \"require('./test.js')\"",
+    "test": "node --test test.js",
     "docker:up": "docker-compose up -d --build",
     "docker:down": "docker-compose down"
   },
