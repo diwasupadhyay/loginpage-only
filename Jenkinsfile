@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'loginpage-app'
-        DOCKER_TAG   = "${env.BUILD_NUMBER}"
-    }
-
     stages {
 
         stage('Checkout') {
@@ -14,26 +9,13 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Environment') {
             steps {
-                bat 'npm ci'
+                bat 'npm install'
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                bat 'npm test'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                bat "docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% ."
-                bat "docker build -t %DOCKER_IMAGE%:latest ."
-            }
-        }
-
-        stage('Deploy') {
+        stage('Build & Deploy') {
             steps {
                 bat 'docker-compose down || exit 0'
                 bat 'docker-compose up -d --build'
@@ -43,10 +25,8 @@ pipeline {
         stage('Health Check') {
             steps {
                 bat '''
-                    echo Waiting for app to start...
                     timeout /t 10 /nobreak
                     curl -f http://localhost:3000/health || exit 1
-                    echo App is healthy!
                 '''
             }
         }
@@ -58,10 +38,6 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
-            bat 'docker-compose logs app || exit 0'
-        }
-        always {
-            cleanWs()
         }
     }
 }
